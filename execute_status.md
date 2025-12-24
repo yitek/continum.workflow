@@ -1,107 +1,88 @@
-Execute Status
------------------
+### Actvity Status Transfer
 ```mermaid
 graph TD
-Created@{
-    label : "Created新建"
-    shape: circle
-    curve: linear
-}
-subgraph  PreExecute准备执行阶段
-    Inited@{
-        label : "Inited初始化"
+
+subgraph "init(PARENT,RECORD?)"
+    Creation[[创建过程]]
+    --create(PARENT,DEFINATION):STATE-->
+    Created@{
+        label : "Created已创建"
         shape: bow-rect
         curve: linear
     }
+    ==enter(STATES):boolean==>
     Entered@{
         label : "Entered已进入"
+        shape: bow-rect
+        curve: linear
+    }
+end
+subgraph "deal(DEALER, INPUT)"
+    Entered==autherize(DEALER):boolean==>
+    Autherized@{
+        label: "Autherized已验证"
         shape: rounded
         curve: linear
     }
-    
-    Inited      =="enter(VARIABLES)=>boolean"==>   Entered
-end
-Created     =="init(SUPER)=>VARIABLES.LOCAL"==>   Inited
-
-
-subgraph  Execute执行阶段
-    Autherized@{
-        label : "Autherized已验权"
-        shape: trap-b
-        curve: linear
-    }
-
-    Inputed@{
-        label : "Inputed已输入(数据)"
+    ==input(INPUT):STATE==>
+    Input@{
+        label: "Input已输入"
         shape: bow-rect
         curve: linear
     }
-
+    ==deal(dealer,INPUT,STATE):OUTPUT|EXCEPTION==>
     Dealing@{
-        label : "Dealing处理中"
-        shape: subproc
+        label: "Dealing处理中"
+        shape: rounded
         curve: linear
     }
-
+    ==result(OUTPUT, EXCEPTION):RESULT==>
     Dealed@{
         label: "Dealed已处理"
         shape: diamond
         curve: linear
     }
-
-    Suspended@{
-        label : "Susended挂起中"
+    ==pend(RESULT):HALT==>
+    Pending@{
+        label: "Pending挂起中"
         shape: bow-rect
         curve: linear
     }
-
-    Done@{
-        label : "Done已执行"
-        shape: bow-rect
-        curve: linear
-    }
-
+    Pending -."re-execute(...)".->Autherized
+    Dealed ==fail(RESULT):void==>
     Failed@{
-        label : "Failed已失败"
+        label: "Failed已失败"
         shape: bow-rect
         curve: linear
     }
-
-    
-    Autherized      =="input(VARIABLES,INPUT)"==>       Inputed
-    Inputed         =="deal(DEALER,INPUT,VARIABLES）=>RETURN"==>       Dealing
-    Dealing         =="dealed(RETURN)=>(STATUS,RESULT)"==>       Dealed
-    Dealed          =="suspend(VARIABLE,RESULT)=>void"==>       Suspended
-    Dealed          =="fail(VARIABLE,RESULT)=>void"==>       Failed
-    Dealed          =="done(VARIABLE,RESULT)=>void"==>       Done
-
+    Dealed ==done(RESULT):void==>
+    Done@{
+        label: "Done已完成"
+        shape: bow-rect
+        curve: linear
+    }
 end
 
-Entered =="autherize(VARIABLES,DEALER)=>boolean"==> Autherized
-
-Suspended -.external-triggle(DEALER,INPUT).-> Autherized
-
-subgraph  PostExecute执行后阶段
-    
-
-    Exported@{ 
-        shape: lin-rect
-        label: "已导出" 
-    }
-
+subgraph "finalize(RESULT)"
+    Done ==exit(RESULT)==> Exited
+    Failed ==exit(RESULT)==> Exited
     Exited@{
-        label : "Exited已退出"
+        label: "Exited已退出"
         shape: rounded
+        curve: linear
     }
-
-    Completed@{
-        label : "Completed已完结"
+    ==PARENT.export(SELF,RESULT,STATE):PARENT.STATE==>
+    Exported@{
+        label: "Exported已导出"
         shape: rounded
+        curve: linear
     }
-    Exported    =="exit(VARIABLE)"==>       Exited
-    Exited      =="complete(REAULT){SUPER.navigateNexts()}"==> Completed
+    ==PARENT.transfer(SELF):ACTIVITY[]==>
+    Transferred@{
+        label: "Transferred已转移"
+        shape: rounded
+        curve: linear
+    }
+    
 end
-
-Done    =="export(RESULT){SUPER.combineSubResult(RESULT)}"==> Exported
-
 ```
