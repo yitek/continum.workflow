@@ -1,4 +1,10 @@
-
+const constants = {
+    outputValueKey : "VALUE",
+    outputPendingStates: ['PENDING','pending','Pending'],
+    outputErrorStates: ['ERROR','Error','error','ERR','err','Err','FAIL','fail','Fail','FAILED','failed','Failed','FAILTURE','Failture','failture'],
+    outputSucessStates: ['OK','Ok','ok','SUCCESS','Success','success','SUCCESSFUL','Successful','successful','PASS','Pass','pass']
+    
+}
 enum ResultStatus {
     Failture,
     Successful,
